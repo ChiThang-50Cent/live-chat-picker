@@ -18,12 +18,14 @@ Extension đọc DOM live chat trực tiếp, **không dùng YouTube Data API**,
 
 ### Cách cài đặt
 
-1. Tải hoặc clone repo này về máy.
-2. Mở `chrome://extensions`.
-3. Bật **Developer mode** (góc trên phải).
-4. Bấm **Load unpacked** → chọn thư mục `live-chat-picker` (thư mục chứa
+1. Tải file `live-chat-picker-v1.0.0.zip` từ repo này về máy (nút **Download**
+   trên GitHub).
+2. **Giải nén** file `.zip` ra một thư mục bất kỳ (vd `live-chat-picker`).
+3. Mở `chrome://extensions`.
+4. Bật **Developer mode** (góc trên phải).
+5. Bấm **Load unpacked** → chọn thư mục vừa giải nén (thư mục chứa
    `manifest.json` ở cấp gốc).
-5. Mở trang livestream YouTube (hoặc cửa sổ popout chat
+6. Mở trang livestream YouTube (hoặc cửa sổ popout chat
    `youtube.com/live_chat?v=...`).
 
 ### Cách dùng
@@ -83,12 +85,14 @@ It reads the live chat DOM directly — **no YouTube Data API, no login, no OAut
 
 ### Install
 
-1. Download or clone this repo.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode** (top right).
-4. Click **Load unpacked** → select the `live-chat-picker` folder (the one
-   containing `manifest.json` at its root).
-5. Open a YouTube livestream (or the popout chat window
+1. Download `live-chat-picker-v1.0.0.zip` from this repo (the **Download**
+   button on GitHub).
+2. **Unzip** the `.zip` to any folder (e.g. `live-chat-picker`).
+3. Open `chrome://extensions`.
+4. Enable **Developer mode** (top right).
+5. Click **Load unpacked** → select the unzipped folder (the one containing
+   `manifest.json` at its root).
+6. Open a YouTube livestream (or the popout chat window
    `youtube.com/live_chat?v=...`).
 
 ### Usage

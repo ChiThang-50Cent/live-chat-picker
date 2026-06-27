@@ -1,7 +1,7 @@
-# Build artifacts
-*.zip
+# Build artifacts (cho phep zip release duoc track)
 *.crx
 *.pem
+# zip release du track rieng, khong match *.zip o day
 
 # OS
 .DS_Store
