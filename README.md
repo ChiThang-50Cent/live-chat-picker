@@ -41,6 +41,9 @@ Một icon **phễu (filter)** sẽ xuất hiện trong thanh tiêu đề của 
    khớp nếu từ khoá là `em`.
 3. Khi host **công bố bắt đầu** minigame → bấm nút **▶ Start** (nút xanh).
    Icon phễu ở header sẽ **đổi sang màu đỏ** để báo đang thu thập.
+
+   ![Bảng Live Chat Picker trạng thái chưa bắt đầu — nút Start màu xanh](images/panel-start.png)
+
 4. Khi host **kết thúc** → bấm **■ Stop** (nút đổi sang đỏ).
 5. Bấm **📋 Copy list** → danh sách tên (mỗi tên một dòng) được copy vào
    clipboard.
@@ -107,6 +110,9 @@ default controls (same row as "Top fan" badge).
    `"em đi không"`, `"anh em"`, `"system"` all match if the keyword is `em`.
 3. When the host **starts** the giveaway → click **▶ Start** (green).
    The header filter icon turns **red** to indicate live collecting.
+
+   ![Live Chat Picker panel before start — green Start button](images/panel-start.png)
+
 4. When the host **ends** → click **■ Stop** (turns red).
 5. Click **📋 Copy list** to copy the list of names (one per line) to clipboard.
 6. Go to [wheelofnames.com](https://wheelofnames.com) → paste into the entry
