@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Live Chat Picker",
+  "version": "1.0.0",
+  "description": "Pick chat participants from a YouTube live stream by keyword.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/watch*",
+        "https://www.youtube.com/live*",
+        "https://www.youtube.com/live_chat*",
+        "https://music.youtube.com/watch*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
