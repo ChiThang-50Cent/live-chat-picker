@@ -1,8 +1,6 @@
 /* Live Chat Picker
- * - Doc live chat cua YouTube (light DOM: #content / #author-name / #message).
- * - Giavobserver luon bat, tu thu thap tin nhan den real-time.
- * - Nut "Scan chat": tu cuon len dau replay de load them tin cu (max 30p),
- *   thu thap toan bo history roi loc danh sach ten unique.
+ * - Doc live chat cua YouTube (light DOM: #content / #author-name / #message)
+ * - Co nut "Bat dau" / "Dung": chi thu thap tin nhan trong khoang dang bat.
  * - Loc theo tu khoa (contain, non case-sensitive) trong noi dung tin nhan.
  * - Lay danh sach ten author, dedup, copy paste vao wheelofnames.com.
  * - Nut tiem vao header cua live chat (icon filter), panel dropdown.
@@ -18,7 +16,7 @@
   const processedNodes = new WeakSet();  // node DOM da xu ly, khong thu lai sau Clear
   let observer = null;
   let chatRoot = null;
-  let scanning = false;          // true trong luc dang scan + cuon history
+  let collecting = false;
   let cfg = loadCfg();
 
   function loadCfg() {
@@ -51,6 +49,7 @@
   }
 
   function addMessageNode(node) {
+    if (!collecting) return;
     if (node && processedNodes.has(node)) return;   // da xu ly -> khong them lai
     const rec = extractFromNode(node);
     if (!rec) return;
@@ -94,7 +93,7 @@
     const startedAt = Date.now();
     attachTimer = setInterval(() => {
       if (attachObserver()) {
-        scanExisting();   // snapshot tin dang hien thi ngay khi chat xuat hien
+        if (collecting) scanExisting();
         clearInterval(attachTimer);
         attachTimer = null;
       } else if (Date.now() - startedAt > ATTACH_TIMEOUT_MS) {
@@ -105,45 +104,19 @@
     return false;
   }
 
-  // ---- Scan toan bo chat (replay history or current visible) ----
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  function getScroller() {
-    return document.querySelector('yt-live-chat-item-list-renderer #item-scroller')
-        || document.querySelector('#item-scroller');
-  }
-  async function scanChat() {
-    if (scanning) return;
-    scanning = true;
-    updateScanBtn();
-    updateHeaderBtnsLive();
-    setStatus(`Scanning… ${messages.length} messages`, true);
+  function startCollecting() {
+    collecting = true;
     ensureAttached();
-    scanExisting();   // bat tin dang co san trong viewport
-    const scroller = getScroller();
-    const startedAt = Date.now();
-    const MAX_MS = 30000;       // toi da 30 giay (phu hop ~30p chat replay)
-    const MAX_ITER = 120;       // cap so lan scroll
-    let lastCount = messages.length;
-    let stableRounds = 0;
-    let iter = 0;
-    if (scroller && scroller.scrollHeight > scroller.clientHeight) {
-      while (iter++ < MAX_ITER && (Date.now() - startedAt) < MAX_MS) {
-        scroller.scrollTop = 0;        // cuon len dau -> YouTube load them tin cu
-        await sleep(700);
-        const now = messages.length;
-        if (now === lastCount) {
-          if (++stableRounds >= 2) break;   // 2 lan khong tang -> cho la da den dau
-        } else { stableRounds = 0; lastCount = now; }
-        setStatus(`Scanning… ${messages.length} messages`, true);
-      }
-      // cuon tro lai cuoi de khong dut UI cua viewer
-      try { scroller.scrollTop = scroller.scrollHeight; } catch (e) {}
-    }
-    scanning = false;
-    updateScanBtn();
+    scanExisting();
+    updateCollectBtn();
     updateHeaderBtnsLive();
-    setStatus(`Done — ${messages.length} messages captured.`);
-    renderList();
+    setStatus('Live — collecting…', true);
+  }
+  function stopCollecting() {
+    collecting = false;
+    updateCollectBtn();
+    updateHeaderBtnsLive();
+    setStatus('Stopped.');
   }
 
   // ---- Filtering ----
@@ -231,8 +204,8 @@
   }
   function updateHeaderBtnsLive() {
     headerBtns.forEach(b => {
-      b.title = scanning ? 'Live Chat Picker (scanning)' : 'Live Chat Picker';
-      b.style.color = scanning ? '#ff3b30' : 'inherit';
+      b.title = collecting ? 'Live Chat Picker (live)' : 'Live Chat Picker';
+      b.style.color = collecting ? '#ff3b30' : 'inherit';
     });
   }
 
@@ -296,7 +269,6 @@
         .collect-btn.stop { background: #c00; color: #fff; }
         .collect-btn.stop:hover { background: #a00; }
         .collect-btn:active { transform: scale(0.98); }
-        .collect-btn:disabled { opacity: .55; cursor: not-allowed; }
         .status {
           font-size: 11px; text-align: center; margin-bottom: 10px; min-height: 14px;
           color: #666;
@@ -338,8 +310,8 @@
           <span class="tag">YouTube</span>
         </div>
         <div class="body">
-          <button class="collect-btn start" id="collectBtn">🔍 Scan chat</button>
-          <div class="status" id="status">Ready to scan.</div>
+          <button class="collect-btn start" id="collectBtn">▶ Start</button>
+          <div class="status" id="status">Not started.</div>
           <div class="kw-field">
             <span>Keyword (case-insensitive, contained in message)</span>
             <input id="kw" type="text" placeholder="e.g. em" />
@@ -352,8 +324,8 @@
           </div>
           <div class="toast" id="toast"></div>
           <div class="hint">
-            • Press <b>Scan chat</b> to scroll back and capture history (up to ~30 min).<br>
-            • New messages are also captured automatically.<br>
+            • Press <b>Start</b> when the host announces, <b>Stop</b> when done.<br>
+            • Only messages arriving while live are collected.<br>
             • Duplicate names are merged; paste straight into wheelofnames.com.
           </div>
         </div>
@@ -374,7 +346,7 @@
     ui.kwIn.value = cfg.keyword || '';
 
     ui.collectBtn.addEventListener('click', () => {
-      if (!scanning) scanChat();
+      if (collecting) stopCollecting(); else startCollecting();
     });
     const onChange = () => {
       cfg.keyword = ui.kwIn.value || '';
@@ -401,15 +373,14 @@
     renderList();
   }
 
-  function updateScanBtn() {
+  function updateCollectBtn() {
     if (!ui.ready) return;
-    ui.collectBtn.className = 'collect-btn start';
-    if (scanning) {
-      ui.collectBtn.textContent = '⏳ Scanning…';
-      ui.collectBtn.disabled = true;
+    if (collecting) {
+      ui.collectBtn.className = 'collect-btn stop';
+      ui.collectBtn.textContent = '■ Stop';
     } else {
-      ui.collectBtn.textContent = '🔍 Scan chat';
-      ui.collectBtn.disabled = false;
+      ui.collectBtn.className = 'collect-btn start';
+      ui.collectBtn.textContent = '▶ Start';
     }
   }
   function setStatus(msg, live) {
